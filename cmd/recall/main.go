@@ -136,8 +136,8 @@ func initCmd() {
 	initEntriesCmd()
 	initTagsCmd()
 	initSearchCmd()
-
-	rootCmd.AddCommand(completionCmd, versionCmd, dbCmd, journalsCmd, entriesCmd, tagsCmd, searchCmd, mcpCmd)
+	initBenchmarkCmd()
+	rootCmd.AddCommand(completionCmd, versionCmd, dbCmd, journalsCmd, entriesCmd, tagsCmd, searchCmd, mcpCmd, benchmarkCmd)
 }
 
 func main() {
