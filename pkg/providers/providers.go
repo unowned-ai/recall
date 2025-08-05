@@ -43,5 +43,14 @@ func CallAPI(req *http.Request, logger *log.Logger) ([]byte, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	return io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// Only log if logger is not nil
+	fmt.Printf("Response body: %s", string(body))
+	fmt.Printf("Response status: %s", resp.Status)
+
+	return body, nil
 }

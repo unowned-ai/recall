@@ -47,7 +47,11 @@ func (a *AnthropicProvider) CallWithTools(ctx context.Context, message string, t
 			{"role": "user", "content": message},
 		},
 		"max_tokens": 4096,
-		"tools":      anthropicTools,
+	}
+
+	// Only include tools if we have them
+	if len(anthropicTools) > 0 {
+		payload["tools"] = anthropicTools
 	}
 
 	bodyBytes, _ := json.Marshal(payload)
