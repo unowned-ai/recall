@@ -98,8 +98,11 @@ func RunSingleIteration(ctx context.Context, config *BenchmarkConfig, opts RunOp
 
 	var results []ModelTestResult
 	for _, s := range scenariosToRun {
-		fmt.Printf("Running Scenario: %s\n", s.Name)
-		fmt.Printf("User Message: '%s'\n", s.Message)
+		if opts.Logger != nil {
+			opts.Logger.Printf("Scenario: %s — %q\n", s.Name, s.Message)
+		} else {
+			fmt.Printf("Scenario: %s — %q\n", s.Name, s.Message)
+		}
 
 		start := time.Now()
 		resp, err := p.CallWithTools(ctx, s.Message, opts.Tools)
@@ -124,16 +127,11 @@ func RunSingleIteration(ctx context.Context, config *BenchmarkConfig, opts RunOp
 
 			result.ActualTools = actualTools
 			result.Success = matchesExpected(actualTools, s.ExpectedTools)
-			fmt.Printf("  Actual Tools: %v\n", actualTools)
-			fmt.Printf("  Expected Tools: %v\n", s.ExpectedTools)
-			fmt.Printf("  Success: %v\n", result.Success)
-			if len(resp.ToolCalls) > 0 {
-				for _, tc := range resp.ToolCalls {
-					fmt.Printf("  Tool Call: %+v\n", tc)
-				}
-			}
+			// Compact one-line summary per scenario
+			fmt.Printf("  Expected: %v | Actual: %v | Success: %v | Time: %.2fs\n",
+				s.ExpectedTools, actualTools, result.Success, duration.Seconds())
 		}
-		fmt.Printf("  Response Time: %.2fs\n\n", duration.Seconds())
+		fmt.Println("")
 		results = append(results, result)
 	}
 	return results, nil

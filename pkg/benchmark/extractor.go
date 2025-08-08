@@ -179,12 +179,3 @@ func (c *Client) send(req interface{}) error {
 func (c *Client) Close() error {
 	return c.w.Close()
 }
-
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
-}

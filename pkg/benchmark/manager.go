@@ -70,7 +70,16 @@ func (tvm *ToolVersionManager) LoadVersions(mcpConfig MCPServerConfig) error {
 		return tvm.InitializeFromCurrentTools(mcpConfig)
 	}
 
-	return json.Unmarshal(data, &tvm.Tools)
+	if err := json.Unmarshal(data, &tvm.Tools); err != nil {
+		return err
+	}
+	// Normalize maps that may have been null in JSON
+	for _, tool := range tvm.Tools {
+		if tool.ModelData == nil {
+			tool.ModelData = make(map[string]*ModelVersionHistory)
+		}
+	}
+	return nil
 }
 
 // SaveVersions saves tool versions to file
@@ -136,6 +145,10 @@ func (tvm *ToolVersionManager) AddVersion(toolName, modelName, newDescription, r
 	tool, exists := tvm.Tools[toolName]
 	if !exists {
 		return fmt.Errorf("tool %s not found", toolName)
+	}
+
+	if tool.ModelData == nil {
+		tool.ModelData = make(map[string]*ModelVersionHistory)
 	}
 
 	modelHistory, ok := tool.ModelData[modelName]

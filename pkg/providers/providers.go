@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"unicode/utf8"
 
 	"github.com/unowned-ai/recall/pkg/mcp"
 )
@@ -48,9 +49,22 @@ func CallAPI(req *http.Request, logger *log.Logger) ([]byte, error) {
 		return nil, err
 	}
 
-	// Only log if logger is not nil
-	fmt.Printf("Response body: %s", string(body))
-	fmt.Printf("Response status: %s", resp.Status)
+	// Only log if logger is provided; avoid noisy stdout
+	if logger != nil {
+		const max = 200
+		preview := body
+		if len(preview) > max {
+			preview = preview[:max]
+			// ensure valid utf-8 in preview
+			for !utf8.Valid(preview) && len(preview) > 0 {
+				preview = preview[:len(preview)-1]
+			}
+		}
+		logger.Printf("HTTP %s %s — %s\n", req.Method, req.URL.Host, resp.Status)
+		if len(preview) > 0 {
+			logger.Printf("Body (truncated): %s\n", string(preview))
+		}
+	}
 
 	return body, nil
 }

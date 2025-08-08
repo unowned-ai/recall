@@ -87,6 +87,7 @@ var (
 	improveWithProvider string // The provider we use to GENERATE improved descriptions
 	improveAPIKey       string // API key for testing
 	improveWithAPIKey   string // API key for generating improvements (if different provider)
+	dryRun              bool   // Do not save changes; preview only
 )
 
 // Flags for history subcommand
@@ -142,6 +143,7 @@ func initBenchmarkCmd() {
 	benchmarkImproveCmd.Flags().StringVar(&improveWithProvider, "improve-with-provider", "openai", "Provider to use for generating improved descriptions")
 	benchmarkImproveCmd.Flags().StringVar(&improveAPIKey, "api-key", "", "API key for testing")
 	benchmarkImproveCmd.Flags().StringVar(&improveWithAPIKey, "improve-api-key", "", "API key for generating improvements (if different from --api-key)")
+	benchmarkImproveCmd.Flags().BoolVar(&dryRun, "dry-run", false, "Preview proposed improvements without saving")
 	benchmarkImproveCmd.MarkFlagRequired("api-key")
 
 	// History subcommand flags
@@ -364,6 +366,9 @@ func runImprovementCycle(ctx context.Context) error {
 		TargetTools:         improveTool,
 		JSONOutput:          jsonOutput,
 	}
+
+	// Wire dry-run flag into the improver (package-level switch)
+	benchmark.DryRun = dryRun
 
 	finalResults, err := benchmark.RunImprovementCycle(ctx, opts)
 	if err != nil {
